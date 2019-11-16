@@ -22,6 +22,8 @@ public class COSC635_ErrorControl {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        int x = 11%19;
+        System.out.println(x);
         
     }
     
