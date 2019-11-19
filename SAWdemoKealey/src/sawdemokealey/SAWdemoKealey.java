@@ -31,37 +31,51 @@ public class SAWdemoKealey {
             } 
          //Makes sure files can be read properly, ignore me, I always do this.
          */
-            Queue<String> fileData = new LinkedList<>();
+        
+        
+            //Scrapped the queue idea, opting instead to more efficently just collect every byte of data to transmit.       
+            //again, better solutions are welcomed!
+            ArrayList<Byte> bytesList = new ArrayList<Byte>();
             while(sysReader.hasNext()){
-                fileData.add(sysReader.next()); 
+                byte[] n = sysReader.next().getBytes();
+                for (byte b : n){
+                    bytesList.add(b);
+                }
             }
+            
+            System.out.println(bytesList.get(WINSIZE));
+  
             //Adds file data to queue. The reason for using a Queue is to ensure
             //data transmission follows FIFO and cannot skip around.
-        try{//Begins nested try block, keeps our error messages consistent.
-            ServerSocket intSocket = new ServerSocket(0); 
+            
+            DatagramSocket intSocket = new DatagramSocket(); 
             //By using param 0 we set it to find a socket for us.
             System.out.println("Found available socket at: "+intSocket.getLocalPort()); //Works!
-            Socket accSocket = intSocket.accept();
-            //Ties up the socket and waits for incoming client. 
-            //We'll need this in both ends of the application to recieve data or the signal to send more data.
-            OutputStream accOutput = accSocket.getOutputStream();
+            //Just printing some routine information.
+            System.out.println("Local address: "+intSocket.getLocalSocketAddress());
+            System.out.println("'Recieve' Buffersize (.getReceiveBufferSize()): "+intSocket.getReceiveBufferSize());
+           // Socket accSocket = intSocket.accept();
+     
+            
             //Output streams appear to transmit byte code.
-            int counter = 1;
-            //Counter keeps track of how many cells of the queue are sent
-            while(fileData.peek()!=null&&counter<WINSIZE){
-                accOutput.write(fileData.element().getBytes());
-                counter++;
-                //Reads and transmits data until it hits WINSIZE-1, stops at WINSIZE-1 to await confirmation
-                //From here we can reset the counter when the confirmation returns.
+            
+            //Converts the input data into an array of bytes for data packets. I recommend breaking this down.
+            byte[] bytes = new byte[bytesList.size()];
+            for (int i = 0; i<bytesList.size(); i++){
+                bytes[i] = bytesList.get(i);
             }
+        
+            
+           
+            
+            DatagramPacket dPack = new DatagramPacket(bytes, WINSIZE); //Again, maybe we break this down into smaller arrays of bytes.
+   
             
         } catch (IOException t){
             System.out.println("Something about servers, ports, and sockets - oh my!");
-        }
-        } catch (FileNotFoundException e){
-            System.out.println("Input file is not found.");
         }
         
     }
     
 }
+
