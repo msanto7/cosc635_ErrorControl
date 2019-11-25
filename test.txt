@@ -1,0 +1,10 @@
+hello
+goodbye
+first
+middle
+last
+king
+queen
+knight
+rook
+bishop
