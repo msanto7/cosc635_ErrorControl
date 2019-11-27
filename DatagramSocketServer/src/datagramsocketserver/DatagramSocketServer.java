@@ -1,5 +1,5 @@
 /*
- * To use server must be running first before client prgram can be run
+ * To use, the server must be running first before client prgram can be run
  * 
  * 
  */
