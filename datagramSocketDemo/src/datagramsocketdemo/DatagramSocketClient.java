@@ -5,18 +5,44 @@
  */
 package datagramsocketdemo;
 
-import java.awt.Color;
 import java.io.*;
 import java.net.*;
+import java.util.Scanner;
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
 
 public class DatagramSocketClient 
 {
     //Global GUI varribles
+    
+    //varrible for connect button
     public static JButton B_CONNECT = new JButton("CONNECT");
+    
+    //varriable for main application window
     public static JFrame MainWindow = new JFrame("Datagram Packet Server");
+    
+    //varriable for scrollbar
     public static JScrollPane SP_OUTPUT = new JScrollPane();
+    
+    //varriable for text output area
     public static JTextArea TA_OUTPUT = new JTextArea();
+    
+    //varrible for the window
+    public static JFrame FRAME = new JFrame("Psudeo error loss simulator"); 
+    
+    //varriable for enter name label        
+    public static JLabel LABEL = new JLabel();
+    
+    //varriable for empty label which will show event after button clicked        
+    public static JLabel LABEL1 = new JLabel();
+    
+    //varriable "textfield" to enter name        
+    public static JTextField TEXTFIELD = new JTextField();
     
 //----------------------------------------------------------------------------//    
     
@@ -26,6 +52,8 @@ public class DatagramSocketClient
     
     public static void main(String[] args) 
     {
+        //creates window that asks user to enter number (1-99) to simulate packet loss
+        Window_Scanner();
         
         BuildGui();
 
@@ -46,7 +74,7 @@ public class DatagramSocketClient
             
             InetAddress IP_ADDRESS = InetAddress.getByName("localhost");
             
-            DatagramPacket PACKET = new DatagramPacket(BUFFER, BUFFER.length, IP_ADDRESS, 444);
+            DatagramPacket PACKET = new DatagramPacket(BUFFER, BUFFER.length, IP_ADDRESS, 555);
 
                 SOCK.send(PACKET);
 
@@ -99,8 +127,8 @@ public class DatagramSocketClient
         MainWindow.getContentPane().add(SP_OUTPUT);
         SP_OUTPUT.setBounds(500, 45, 1000, 800);
         
-        MainWindow_Action();
         //instansiates the action listener method to allow for user mouse clicks
+        MainWindow_Action();        
         
         MainWindow.setVisible(true);
         
@@ -124,5 +152,57 @@ public class DatagramSocketClient
                 Connect();
             }        
         });
-    }        
+    }    
+
+//----------------------------------------------------------------------------//
+
+    public static void Window_Scanner()
+    {
+        
+        Scanner KEYBOARD = new Scanner(System.in);
+        
+	JButton BUTTON = new JButton("Submit");    
+	BUTTON.setBounds(400, 400, 140, 40);   
+        	
+	LABEL.setText("Enter number between 1-99 :");
+	LABEL.setBounds(220, 150, 200, 100);
+     
+	LABEL1.setBounds(10, 110, 200, 100);
+       
+	TEXTFIELD.setBounds(220, 250, 500, 30);
+        
+	//add to frame
+	FRAME.add(LABEL1);
+	FRAME.add(TEXTFIELD);
+	FRAME.add(LABEL);
+	FRAME.add(BUTTON);    
+	FRAME.setSize(1000, 1000);    
+	FRAME.setLayout(null);    
+	FRAME.setVisible(true);    
+	FRAME.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);   
+	
+        TEXTFIELD.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                String INPUT = TEXTFIELD.getText();
+                LABEL1.setText(INPUT);
+                
+            }        
+        });
+        
+        
+	//action listener
+	BUTTON.addActionListener(new ActionListener() 
+        {
+	        
+		@Override
+		public void actionPerformed(ActionEvent arg0) 
+                {
+                    
+                    LABEL1.setText("packet loss is set to " + INPUT);	
+                    
+		}          
+        });
+	}
 }

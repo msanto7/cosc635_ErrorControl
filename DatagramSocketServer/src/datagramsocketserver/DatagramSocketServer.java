@@ -12,13 +12,14 @@ import java.util.Scanner;
 
 public class DatagramSocketServer extends Thread 
 {
-    
+
+        //creates datagram scoket    
         protected DatagramSocket SOCK = null;
-        //creates datagram scoket
-        public int packCount =0;
-        
-        String[] bArray = readArray("../COSC635_P2_DataSent.txt");
-        //calls method that reads from .txt file and returns elements as an array of strings       
+
+        public int PACKCOUNT =0;
+
+        //calls method that reads from .txt file and returns elements as an array of strings              
+        String[] bArray = readArray("../COSC635_P2_DataSent.txt"); 
         
     /**
      * @param args the command line arguments
@@ -38,15 +39,19 @@ public class DatagramSocketServer extends Thread
      */ 
     public DatagramSocketServer() throws IOException
     {
-        SOCK = new DatagramSocket(444);
+        
+        SOCK = new DatagramSocket(555);
+        
         System.out.println("Launch server thread");
+        
         System.out.println("Waiting for client to connect...");
+        
     }
     
 //----------------------------------------------------------------------------// 
     
     /***
-     * initiates the program to be able to receive confirmation to begin sending packets
+     * initiates the program to be able to receive confirmation from client to begin sending packets
      */   
     
     public void run()
@@ -54,26 +59,37 @@ public class DatagramSocketServer extends Thread
       while(true) 
       {
           try
-          {
+          {     
+              //varriable to hold the data 
               byte[] BUFFER = new byte[1024];
               
-              DatagramPacket PACKET = new DatagramPacket(BUFFER, BUFFER.length);
               //Recieve client request
+              DatagramPacket PACKET = new DatagramPacket(BUFFER, BUFFER.length);
               
               SOCK.receive(PACKET);
               
-              String MESSAGE = NextPack();
+              //varrible created from the return of NextPack ie the lines read from .txt file
+              String MESSAGE = NextPack();  
               
+              //Loop to increase number of lines sent in each packet
+              for (int i = 0;  i < 5; i++)
+              {
+                  MESSAGE = MESSAGE + NextPack();
+              }    
+
+              //"BUFFER" holds lines read as string, in byte array form
               BUFFER = MESSAGE.getBytes();
               
+              //send reply to client at "address" and "port"              
               InetAddress IP_ADDRESS = PACKET.getAddress();
-              //send reply to client at "address" and "port"
               
+              //gets the port of the recieved packet
               int PORT = PACKET.getPort();
               
               PACKET = new DatagramPacket(BUFFER, BUFFER.length, IP_ADDRESS, PORT);
               
               SOCK.send(PACKET);
+              
           }
           catch(IOException e)
           {
@@ -92,9 +108,9 @@ public class DatagramSocketServer extends Thread
      */ 
        public static String[] readArray(String file) 
        {
-           
+        
+        //used to count number of strings   
         int counter = 0;
-        //used to count number of strings
         
         try
         {
@@ -141,17 +157,23 @@ public class DatagramSocketServer extends Thread
            String MESSAGE = "";
            Date theTime = new Date();
                    
-           if(packCount > bArray.length - 1) 
+           if(PACKCOUNT > bArray.length - 1) 
            {  
-              MESSAGE = "\n out of elements to send finished at:\n" +
-                      theTime.toString() + " .";
+               
+              MESSAGE = "\n out of elements to send finished at:\n" + theTime.toString() + " .";
+              
               System.out.println("\nAll packets were sent");
+              
            }
            else
            {
-               MESSAGE = (packCount + 1) + ". " + bArray[packCount];
-               System.out.println("\n sending out packet # " + (packCount + 1));
-               packCount++;
+               
+               MESSAGE = (PACKCOUNT + 1) + ". " + bArray[PACKCOUNT];
+               
+               System.out.println("\n sending out packet # " + (PACKCOUNT + 1));
+               
+               PACKCOUNT++;
+               
            }
            
            return MESSAGE;
