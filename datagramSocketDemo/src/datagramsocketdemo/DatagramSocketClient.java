@@ -5,103 +5,124 @@
  */
 package datagramsocketdemo;
 
+import java.awt.Color;
 import java.io.*;
 import java.net.*;
-import java.util.Scanner;
+import javax.swing.*;
 
-public class DatagramSocketClient {
-
+public class DatagramSocketClient 
+{
+    //Global GUI varribles
+    public static JButton B_CONNECT = new JButton("CONNECT");
+    public static JFrame MainWindow = new JFrame("Datagram Packet Server");
+    public static JScrollPane SP_OUTPUT = new JScrollPane();
+    public static JTextArea TA_OUTPUT = new JTextArea();
+    
+//----------------------------------------------------------------------------//    
+    
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    
+    public static void main(String[] args) 
+    {
         
-        DatagramSocket skt = null;
-        //creates the DatagramSocket
-        try{
+        BuildGui();
+
+    }
+
+//----------------------------------------------------------------------------//
+    
+    public static void Connect()
+    {
+        try
+        {
+         
+            //create a datagram socket
+            DatagramSocket SOCK = new DatagramSocket();
             
-            skt = new DatagramSocket();
+            //connect to the server
+            byte[] BUFFER = new byte[1024];
             
-            String[] bArray = readArray("../COSC635_P2_DataSent.txt");
-            //calls method that reads from .txt file and returns elements as an array of strings
+            InetAddress IP_ADDRESS = InetAddress.getByName("localhost");
             
-            String holder = "";
-            
-            //little bit of code to print elements in bArray
-            for (int i = 0;  i < bArray.length; i++) {
-                System.out.println(bArray[i]);
-                holder = bArray[i];
+            DatagramPacket PACKET = new DatagramPacket(BUFFER, BUFFER.length, IP_ADDRESS, 444);
+
+                SOCK.send(PACKET);
+
+                //reconstruct bew Packet and request packet from server
+                PACKET = new DatagramPacket(BUFFER, BUFFER.length);
+
+                SOCK.receive(PACKET);
+
+                //extract data from stream and convert to string
+                String MESSAGE = new String(PACKET.getData(), 0, PACKET.getLength());
                 
-            }
+                //appends String "MESSAGE" to the global gui output varrible "TA_OUTPUT"
+                TA_OUTPUT.append(MESSAGE);
             
-            String msg = "text message";
-            //test message this is where the file reader varible could be put instead
+            SOCK.close();
             
-            byte [] b = msg.getBytes();
-            //converts data into array of bytes and holds it in varrible "b"
-            
-            InetAddress host = InetAddress.getByName("localhost");
-            //internet address of server "localhost" is local machine
-            
-            int serverSocket = 6700;
-            //socket or port number to be used
-            
-            DatagramPacket request = new DatagramPacket(b, b.length , host, serverSocket);
-            //creates datagram packet puts in data "b", with length.b, host ip address, port number
-            
-            skt.send(request);
-            //initializes socket "skt" to send packet "request"
-            
-            
-            //---------------------------------------------------//
-            
-            byte [] buffer = new byte[1024];
-            //creates buffer to catch and hold incoming packet data
-            
-            DatagramPacket reply = new DatagramPacket(buffer,buffer.length);
-            //constructs packet to hold incoming byte data to be read on client machine
-            
-            skt.receive(reply);
-            //initializes socket to recieve incoming packet data
-            
-            System.out.println("Client recieved " + new String(reply.getData()));
-            
-            skt.close();
-            //need to close socket at end of transmission
         }
-        catch(Exception ex){
-            
+        catch(IOException X)
+        {
+            System.out.print(X);
         }
     }
-    /***
-     * takes in a .txt file and creates an array of strings of the elements in the file
-     * @param String file
-     * @return Byte[] byteSize
-     */
-    public static String[] readArray(String file) {
-        
-        int counter = 0;
-        
-        try{
-            Scanner s = new Scanner(new File(file));
-            while (s.hasNextLine()){
-                counter++;
-                s.next();
-            }
-            
-            String[] words = new String[counter];
-            
-            Scanner s1 = new Scanner(new File(file));
-            
-            for (int i = 0; i < counter; i++) {
-                words[i] = s1.next();
-            }
-            return words;
-        }
-        catch(FileNotFoundException e){
-            System.out.println("file not found");
-        }
-        return null;
-    } 
     
+//----------------------------------------------------------------------------//
+
+     /**
+     *constructor for the GUI and sets the specific fields for the global GUI varribles
+     */
+    
+    public static void BuildGui()
+    {
+        
+        MainWindow.setSize(2000, 1800);
+        MainWindow.setLocation(200, 200);
+        MainWindow.setResizable(true);
+        MainWindow.setBackground(new java.awt.Color(255, 255, 255));
+        MainWindow.getContentPane().setLayout(null);
+        
+        B_CONNECT.setBackground(new java.awt.Color(0, 0, 255));
+        B_CONNECT.setForeground(new java.awt.Color(255, 255, 255));
+        MainWindow.getContentPane().add(B_CONNECT);
+        B_CONNECT.setBounds(150, 200, 220, 50);
+        
+        TA_OUTPUT.setLineWrap(true);
+        SP_OUTPUT.setHorizontalScrollBarPolicy(
+                  ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        SP_OUTPUT.setVerticalScrollBarPolicy(
+                  ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        SP_OUTPUT.setViewportView(TA_OUTPUT);
+        MainWindow.getContentPane().add(SP_OUTPUT);
+        SP_OUTPUT.setBounds(500, 45, 1000, 800);
+        
+        MainWindow_Action();
+        //instansiates the action listener method to allow for user mouse clicks
+        
+        MainWindow.setVisible(true);
+        
+    }
+    
+//----------------------------------------------------------------------------//
+
+    /**
+     * creates a methods that implements ActionListener to be able to read user mouse clicks
+     */
+    
+    public static void MainWindow_Action()
+    {
+        
+        B_CONNECT.addActionListener(
+        
+        new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                Connect();
+            }        
+        });
+    }        
 }
