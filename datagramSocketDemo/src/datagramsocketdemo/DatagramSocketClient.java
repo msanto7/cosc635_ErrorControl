@@ -7,7 +7,6 @@ package datagramsocketdemo;
 
 import java.io.*;
 import java.net.*;
-import java.util.Scanner;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -24,25 +23,14 @@ public class DatagramSocketClient
     public static JButton B_CONNECT = new JButton("CONNECT");
     
     //varriable for main application window
-    public static JFrame MainWindow = new JFrame("Datagram Packet Server");
+    public static JFrame MAIN_WINDOW = new JFrame("Datagram Packet Server");
     
     //varriable for scrollbar
     public static JScrollPane SP_OUTPUT = new JScrollPane();
     
     //varriable for text output area
     public static JTextArea TA_OUTPUT = new JTextArea();
-    
-    //varrible for the window
-    public static JFrame FRAME = new JFrame("Psudeo error loss simulator"); 
-    
-    //varriable for enter name label        
-    public static JLabel LABEL = new JLabel();
-    
-    //varriable for empty label which will show event after button clicked        
-    public static JLabel LABEL1 = new JLabel();
-    
-    //varriable "textfield" to enter name        
-    public static JTextField TEXTFIELD = new JTextField();
+
     
 //----------------------------------------------------------------------------//    
     
@@ -52,8 +40,6 @@ public class DatagramSocketClient
     
     public static void main(String[] args) 
     {
-        //creates window that asks user to enter number (1-99) to simulate packet loss
-        Window_Scanner();
         
         BuildGui();
 
@@ -74,7 +60,7 @@ public class DatagramSocketClient
             
             InetAddress IP_ADDRESS = InetAddress.getByName("localhost");
             
-            DatagramPacket PACKET = new DatagramPacket(BUFFER, BUFFER.length, IP_ADDRESS, 555);
+            DatagramPacket PACKET = new DatagramPacket(BUFFER, BUFFER.length, IP_ADDRESS, 777);
 
                 SOCK.send(PACKET);
 
@@ -107,30 +93,28 @@ public class DatagramSocketClient
     public static void BuildGui()
     {
         
-        MainWindow.setSize(2000, 1800);
-        MainWindow.setLocation(200, 200);
-        MainWindow.setResizable(true);
-        MainWindow.setBackground(new java.awt.Color(255, 255, 255));
-        MainWindow.getContentPane().setLayout(null);
+        MAIN_WINDOW.setSize(2000, 1800);
+        MAIN_WINDOW.setLocation(200, 200);
+        MAIN_WINDOW.setResizable(true);
+        MAIN_WINDOW.setBackground(new java.awt.Color(255, 255, 255));
+        MAIN_WINDOW.getContentPane().setLayout(null);
         
         B_CONNECT.setBackground(new java.awt.Color(0, 0, 255));
         B_CONNECT.setForeground(new java.awt.Color(255, 255, 255));
-        MainWindow.getContentPane().add(B_CONNECT);
+        MAIN_WINDOW.getContentPane().add(B_CONNECT);
         B_CONNECT.setBounds(150, 200, 220, 50);
         
         TA_OUTPUT.setLineWrap(true);
-        SP_OUTPUT.setHorizontalScrollBarPolicy(
-                  ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        SP_OUTPUT.setVerticalScrollBarPolicy(
-                  ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        SP_OUTPUT.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        SP_OUTPUT.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         SP_OUTPUT.setViewportView(TA_OUTPUT);
-        MainWindow.getContentPane().add(SP_OUTPUT);
+        MAIN_WINDOW.getContentPane().add(SP_OUTPUT);
         SP_OUTPUT.setBounds(500, 45, 1000, 800);
         
         //instansiates the action listener method to allow for user mouse clicks
         MainWindow_Action();        
         
-        MainWindow.setVisible(true);
+        MAIN_WINDOW.setVisible(true);
         
     }
     
@@ -152,57 +136,5 @@ public class DatagramSocketClient
                 Connect();
             }        
         });
-    }    
-
-//----------------------------------------------------------------------------//
-
-    public static void Window_Scanner()
-    {
-        
-        Scanner KEYBOARD = new Scanner(System.in);
-        
-	JButton BUTTON = new JButton("Submit");    
-	BUTTON.setBounds(400, 400, 140, 40);   
-        	
-	LABEL.setText("Enter number between 1-99 :");
-	LABEL.setBounds(220, 150, 200, 100);
-     
-	LABEL1.setBounds(10, 110, 200, 100);
-       
-	TEXTFIELD.setBounds(220, 250, 500, 30);
-        
-	//add to frame
-	FRAME.add(LABEL1);
-	FRAME.add(TEXTFIELD);
-	FRAME.add(LABEL);
-	FRAME.add(BUTTON);    
-	FRAME.setSize(1000, 1000);    
-	FRAME.setLayout(null);    
-	FRAME.setVisible(true);    
-	FRAME.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);   
-	
-        TEXTFIELD.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
-                String INPUT = TEXTFIELD.getText();
-                LABEL1.setText(INPUT);
-                
-            }        
-        });
-        
-        
-	//action listener
-	BUTTON.addActionListener(new ActionListener() 
-        {
-	        
-		@Override
-		public void actionPerformed(ActionEvent arg0) 
-                {
-                    
-                    LABEL1.setText("packet loss is set to " + INPUT);	
-                    
-		}          
-        });
-	}
+    }      
 }
