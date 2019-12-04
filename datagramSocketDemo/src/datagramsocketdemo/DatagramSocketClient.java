@@ -104,4 +104,54 @@ public class DatagramSocketClient {
         return null;
     } 
     
+    
+    /**
+     * This method takes our received data packet and writes it to an output file.
+     * This will append the packet to the output file.
+     * @param in is an array of received data;
+     */
+    public static void writeOut(byte[] in){
+        String message = new String(in);
+        //Converts the byte[] back into a String.
+        //I think you have to do this. 
+        File outputFile = new File("./635Group4Output.txt"); 
+        //Makes our file.
+        String location = outputFile.getAbsolutePath();
+        //Gets a string to the directory location of the outputfile
+        System.out.println("Writing output to 635Group4Output.txt at: "
+                + location);
+        //Tells user where to find the output file.
+        try {
+            FileWriter outWriter = new FileWriter(outputFile, true);
+            //The true parameter means it will append data rather than overwrite the file..
+            outWriter.write(message);
+            //Writes our output.
+            outWriter.flush();
+            outWriter.close();
+        } catch (IOException e){
+            System.out.println("Output file wasn't found, this shouldn't be possible.");
+        }
+    }
+    
+    /**
+     * This should be called at the very beginning of the app, so that if the app
+     * is run more than once it clears the output file instead of constantly
+     * appending data to the end
+     */
+    public static void outClear(){
+        File outputFile = new File("./635Group4Output.txt"); 
+        try {
+            if(outputFile.exists()){
+                FileWriter clearer = new FileWriter (outputFile, false);
+                //'false' means it should overwrite the contents of the file. I hope.
+                clearer.write(" ");
+                clearer.flush();
+                clearer.close();
+                System.out.print("Output file cleared");
+            } 
+        } catch (IOException e){
+            
+        }
+    }
+    
 }
