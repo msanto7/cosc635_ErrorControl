@@ -55,8 +55,11 @@ public class DatagramSocketServer extends Thread
      */
     public static void main(String[] args) throws IOException
     {
+        
         Window_Scanner();
+        
         DatagramSocketServer SERVER = new DatagramSocketServer();
+        
         SERVER.start();
 
     }
@@ -97,13 +100,18 @@ public class DatagramSocketServer extends Thread
               
               SOCK.receive(PACKET);
               
+              for (int i = 0; i < bArray.length ; i++)
+              {
+                      
               //varrible created from the return of NextPack ie the lines read from .txt file
               String MESSAGE = NextPack();  
               
               //Loop to increase number of lines sent in each packet
-              for (int i = 0;  i < 5; i++)
+              for (int j = 0;  j < 5; j++)
               {
+                  
                   MESSAGE = MESSAGE + NextPack();
+                  
               }    
 
               //"BUFFER" holds lines read as string, in byte array form
@@ -119,13 +127,22 @@ public class DatagramSocketServer extends Thread
               
               if (dropSimulator(RANDOM) == false)
               {    
-              SOCK.send(PACKET);
+                  
+                  SOCK.send(PACKET);
+              
+              }
+              
               }
           }
+          
           catch(IOException e)
+              
           {
+              
               e.printStackTrace();
+              
               break;
+              
           }
       }
     }
