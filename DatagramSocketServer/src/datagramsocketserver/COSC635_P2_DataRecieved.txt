@@ -1,4 +1,4 @@
-aaNetwork Working Group                                         W. Stevens
+ aaNetwork Working Group                                         W. Stevens
 Request for Comments: 3542                                     M. Thomas
 Obsoletes: 2292                                               Consultant
 Category: Informational                                      E. Nordmark

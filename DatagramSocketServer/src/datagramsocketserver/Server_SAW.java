@@ -28,21 +28,25 @@ public class Server_SAW {
     {
         int portNumServer = 50000;        
         int portNumClient = 50001;
+        int numPacketsSent = 0;
+        int numPacketsLost = 0;
+        long startTime = 0;
+        long endTime = 0;
         
         // Scanner obj for user input
         Scanner input = new Scanner(System.in);
         
         // prompt user for random number to simulate packet loss         
-        int num1;        
+        int userInput;        
         do {
             System.out.println(" Please enter a number between [0,99]. ");
             while (!input.hasNextInt()) {
                 System.out.println("Input is not a number, please try again.");
-                input.next(); // this is important!
+                input.next();
             }
-            num1 = input.nextInt();
-        } while (num1 < 0 || num1 > 99);
-        System.out.println("Number " + num1 + " recieved. ");                           
+            userInput = input.nextInt();
+        } while (userInput < 0 || userInput > 99);
+        System.out.println("Number " + userInput + " recieved. ");                           
         
         // set up socket for client
         try (DatagramSocket serverSocket = new DatagramSocket(portNumServer))
@@ -51,7 +55,12 @@ public class Server_SAW {
             File inputFile = new File("src/datagramsocketserver/COSC635_P2_DataSent.txt");        
             byte[] inputBytes = fileToBytes(inputFile);
             
+            // attempt to send data while input file still has text
             for (int i = 0; i < inputBytes.length; i = i + 1024) {
+                // save the start time 
+                startTime = System.nanoTime();
+                
+                // initialize acknowledgement bool to false
                 boolean ack = false;
                 
                 // create new byte array of the section we want for this specific packet
@@ -67,14 +76,15 @@ public class Server_SAW {
 
                 while (ack == false) {
                     
-                    if (DropPacket(num1)) {
-                        //packet is dropped - do not send
+                    if (DropPacket(userInput)) {
+                        //packet is dropped - update counter
+                        numPacketsLost++;
                     } else {
                         // send the udp packet to the client 
-                        serverSocket.send(datagramPacket);
+                        serverSocket.send(datagramPacket);                        
                     }
                     
-                    // resend data if timeout is reached
+                    // resend data if timeout is reached befire ack is recieved 
                     serverSocket.setSoTimeout(3000);
                     
                     try {
@@ -83,15 +93,17 @@ public class Server_SAW {
                         DatagramPacket ackPacket = new DatagramPacket(buffer, buffer.length);
                         serverSocket.receive(ackPacket);
                         String ackMessage = "received packet";
-                        //if (Arrays.equals(ackPacket.getData(), ackMessage.getBytes())) {
-                           ack = true; 
-                        //}                        
+                        numPacketsSent++;
+                        ack = true;                    
                     }
                     catch (SocketTimeoutException e) {
                         System.out.println("Acknowledgment not recieved after 3 seconds, resending data");
                     }                                                                                    
                 }                                
-            }                        
+            } 
+            
+            // save stop time when sending data has finished 
+            endTime = System.nanoTime();
         }
         catch (SocketException e) {
             e.printStackTrace();
@@ -99,6 +111,12 @@ public class Server_SAW {
         catch (IOException e) {
             e.printStackTrace();
         }
+        
+        //Print out Basic Statistics
+        System.out.println("The server took " + (endTime - startTime) + " nanoseconds to complete sending all of the data.");
+        System.out.println("The server successfully sent " + numPacketsSent + " packets. ");
+        System.out.println("The server dropped " + numPacketsLost + " packets (simulated). ");
+                       
                                               
     } // Ends Main
     
@@ -145,3 +163,4 @@ public class Server_SAW {
         
     
 } //Ends Class 
+
