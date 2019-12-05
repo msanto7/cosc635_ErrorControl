@@ -28,11 +28,11 @@ public class DatagramSocketClient {
             String holder = "";
             
             //little bit of code to print elements in bArray
-            for (int i = 0;  i < bArray.length; i++) {
-                System.out.println(bArray[i]);
-                holder = bArray[i];
-                
-            }
+//            for (int i = 0;  i < bArray.length; i++) {
+//                System.out.println(bArray[i]);
+//                holder = bArray[i];
+//                
+//            }
             
             String msg = "text message";
             //test message this is where the file reader varible could be put instead
