@@ -118,6 +118,7 @@ public class DatagramSocketClient
         
     }
     
+
 //----------------------------------------------------------------------------//
 
     /**
@@ -137,4 +138,88 @@ public class DatagramSocketClient
             }        
         });
     }      
+
+    
+    /**
+     * This method takes our received data packet and writes it to an output file.
+     * This will append the packet to the output file.
+     * @param in is an array of received data;
+     */
+    public static void writeOut(byte[] in)
+    {
+        //Converts the byte[] back into a String.
+        //I think you have to do this. 
+        String message = new String(in);
+        
+        //Makes our file.
+        File outputFile = new File("./635Group4Output.txt"); 
+        
+        //Gets a string to the directory location of the outputfile
+        String location = outputFile.getAbsolutePath();
+        
+        //Tells user where to find the output file.
+        System.out.println("Writing output to 635Group4Output.txt at: "
+                + location);
+        
+        try 
+        {
+            //The true parameter means it will append data rather than overwrite the file..
+            FileWriter outWriter = new FileWriter(outputFile, true);
+            
+            //Writes our output.
+            outWriter.write(message);
+            
+            outWriter.flush();
+            
+            outWriter.close();
+            
+        } 
+        
+        catch (IOException e)
+            
+        {
+            
+            System.out.println("Output file wasn't found, this shouldn't be possible.");
+            
+        }
+    }
+    
+    /**
+     * This should be called at the very beginning of the app, so that if the app
+     * is run more than once it clears the output file instead of constantly
+     * appending data to the end
+     */
+    public static void outClear()
+    {
+        
+        File outputFile = new File("./635Group4Output.txt"); 
+        
+        try 
+        {
+            
+            if(outputFile.exists())
+            {
+                
+                //'false' means it should overwrite the contents of the file. I hope.
+                FileWriter clearer = new FileWriter (outputFile, false);
+                
+                clearer.write(" ");
+                
+                clearer.flush();
+                
+                clearer.close();
+                
+                System.out.print("Output file cleared");
+                
+            } 
+        } 
+        
+        catch (IOException e)
+            
+        {
+            
+        }
+    }
+    
 }
+
