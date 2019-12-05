@@ -13,3 +13,9 @@ Team Members
 
 ## Dependencies 
 --> Java 
+
+## SAW Protocol Design
+- max payload size = 
+- header size = 
+- number of fields = 
+- message sequencing 

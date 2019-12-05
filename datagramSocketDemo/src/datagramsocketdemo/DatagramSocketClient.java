@@ -60,20 +60,39 @@ public class DatagramSocketClient
             
             InetAddress IP_ADDRESS = InetAddress.getByName("localhost");
             
+
             DatagramPacket PACKET = new DatagramPacket(BUFFER, BUFFER.length, IP_ADDRESS, 777);
 
-                SOCK.send(PACKET);
+            SOCK.send(PACKET);
 
-                //reconstruct bew Packet and request packet from server
-                PACKET = new DatagramPacket(BUFFER, BUFFER.length);
+            //reconstruct bew Packet and request packet from server
+            PACKET = new DatagramPacket(BUFFER, BUFFER.length);
 
-                SOCK.receive(PACKET);
+            SOCK.receive(PACKET);
 
-                //extract data from stream and convert to string
-                String MESSAGE = new String(PACKET.getData(), 0, PACKET.getLength());
-                
-                //appends String "MESSAGE" to the global gui output varrible "TA_OUTPUT"
-                TA_OUTPUT.append(MESSAGE);
+            //extract data from stream and convert to string
+            String MESSAGE = new String(PACKET.getData(), 0, PACKET.getLength());
+
+            //appends String "MESSAGE" to the global gui output varrible "TA_OUTPUT"
+            TA_OUTPUT.append(MESSAGE);
+            
+            String msg = "text message";
+            //test message this is where the file reader varible could be put instead
+            
+            byte [] b = msg.getBytes();
+            //converts data into array of bytes and holds it in varrible "b"
+            
+            InetAddress host = InetAddress.getByName("localhost");
+            //internet address of server "localhost" is local machine
+            
+            int serverSocket = 6700;
+            //socket or port number to be used
+            
+            DatagramPacket request = new DatagramPacket(b, b.length , host, serverSocket);
+            //creates datagram packet puts in data "b", with length.b, host ip address, port number
+            
+            SOCK.send(request);
+            //initializes socket "skt" to send packet "request"
             
             SOCK.close();
             
@@ -139,6 +158,7 @@ public class DatagramSocketClient
         });
     }      
 
+//----------------------------------------------------------------------------//    
     
     /**
      * This method takes our received data packet and writes it to an output file.
@@ -183,6 +203,8 @@ public class DatagramSocketClient
             
         }
     }
+   
+//----------------------------------------------------------------------------//    
     
     /**
      * This should be called at the very beginning of the app, so that if the app
