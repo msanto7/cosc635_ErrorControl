@@ -131,7 +131,12 @@ public class DatagramSocketServer extends Thread
                   SOCK.send(PACKET);
               
               }
-              
+              else
+              {
+                  
+                  
+                  
+              }
               }
           }
           
