@@ -24,11 +24,13 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class Server_GBN {
+    
+    // Maximum Segment Size - Quantity of data from the application layer in the segment
+    public static final int MSS = 4;
 
     public static void main(String[] args) throws Exception {
 
         int last = 0;
-        int numPacketsSent = 0;
         int numPacketsLost = 0;
         int portNumServer = 50000;
         int portNumClient = 50001;
@@ -66,7 +68,7 @@ public class Server_GBN {
         byte[] inputBytes = fileToBytes(inputFile);
 
         // Last packet sequence number
-        numPacketsSent = (int) Math.ceil((double) inputBytes.length / packetSize);
+        int numPacketsSent = (int) Math.ceil((double) inputBytes.length / MSS);
 
         DatagramSocket serverSocket = new DatagramSocket(portNumServer);
         InetAddress clientIP = InetAddress.getByName("localhost");
@@ -84,8 +86,8 @@ public class Server_GBN {
             while (last - seqACK < window && last < numPacketsSent) {
 
                 // create new byte array of the section we want for this specific packet
-                byte[] filePacketBytes = new byte[packetSize];
-                filePacketBytes = Arrays.copyOfRange(inputBytes, last * packetSize, last * packetSize + packetSize);
+                byte[] filePacketBytes = new byte[MSS];
+                filePacketBytes = Arrays.copyOfRange(inputBytes, last * MSS, last * MSS + MSS);
                 // create packet object for sending
                 PacketData serverPacket = new PacketData(last, filePacketBytes, (last == numPacketsSent - 1) ? true : false);
                 byte[] sendData = toBytes(serverPacket);
@@ -111,12 +113,12 @@ public class Server_GBN {
             }
 
             // recieve ack
-            byte[] buffer = new byte[40];
+            byte[] buffer = new byte[44];
             DatagramPacket ack = new DatagramPacket(buffer, buffer.length);
 
             try {
-                // resend data if timeout is reached befire ack is recieved 
-                serverSocket.setSoTimeout(3000);
+                // resend data if timeout is reached before ack is recieved 
+                serverSocket.setSoTimeout(50);
                 serverSocket.receive(ack);
                 ReturnData ackObject = (ReturnData) toObject(ack.getData());
                 if (ackObject.getPacket() == numPacketsSent) {
@@ -128,7 +130,7 @@ public class Server_GBN {
 
                 for (int i = seqACK; i < last; i++) {
                     System.out.println("Acknowledgment not recieved after 3 seconds, resending data");
-                    byte[] sendData = toBytes(packetList.get(i));
+                    byte[] sendData = toBytes(packetList.get(i));                    
 
                     // create packet to send to the client 
                     DatagramPacket packet = new DatagramPacket(
@@ -202,9 +204,22 @@ public class Server_GBN {
      * @return
      */
     public static Object toObject(byte[] bytes) throws IOException, ClassNotFoundException {
-        ByteArrayInputStream b = new ByteArrayInputStream(bytes);
-        ObjectInputStream o = new ObjectInputStream(b);
-        return o.readObject();
+        Object obj = null;
+        ByteArrayInputStream bis = null;
+        ObjectInputStream ois = null;
+        try {
+            bis = new ByteArrayInputStream(bytes);
+            ois = new ObjectInputStream(bis);
+            obj = ois.readObject();
+        } finally {
+            if (bis != null) {
+                bis.close();
+            }
+            if (ois != null) {
+                ois.close();
+            }
+        }
+        return obj;
     }
 
     /**

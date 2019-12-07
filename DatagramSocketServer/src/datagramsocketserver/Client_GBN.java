@@ -18,6 +18,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
 import org.apache.commons.io.FileUtils;
@@ -31,12 +32,17 @@ public class Client_GBN {
         int numACKPacketsLost = 0;
         int portNumServer = 50000;
         int portNumClient = 50001;
-        int packetSize = 87;
+        int packetSize = 88;
         boolean emptyData = false;
+        long startTime = 0;
+        long endTime = 0;
         File outputFile = new File("src/datagramsocketserver/COSC635_P2_DataRecieved.txt");
 
         // Scanner obj for user input
         Scanner input = new Scanner(System.in);
+        
+        // clear the output file 
+        outClear();
 
         // prompt user for random number to simulate packet loss         
         int userInput;
@@ -51,15 +57,18 @@ public class Client_GBN {
 
         // setup the udp socket for the client to recieve data from the server
         DatagramSocket clientSocket = new DatagramSocket(portNumClient);
-        byte[] tempBytes = new byte[packetSize];
+        byte[] tempBytes = new byte[88];
         ArrayList<PacketData> received = new ArrayList<PacketData>();        
 
         // recieve data until there is no more
         while (!emptyData) {
             
+            // save the start time 
+            startTime = System.nanoTime();
+            
             DatagramPacket datagramPacket = new DatagramPacket(tempBytes, tempBytes.length);
             clientSocket.receive(datagramPacket);
-            PacketData datagramObject = (PacketData) toObject(datagramPacket.getData());
+            PacketData datagramObject = (PacketData) toObject(datagramPacket.getData());           
 
             // no more data left to send
             if (datagramObject.getSeq() == currentWindow && datagramObject.isLast()) {
@@ -72,8 +81,7 @@ public class Client_GBN {
                 received.add(datagramObject);
             // transmission error 
             } else {
-                // drop packet 
-                
+                // drop packet                 
             }
 
             ReturnData ackInfo = new ReturnData(currentWindow);
@@ -93,17 +101,21 @@ public class Client_GBN {
                 clientSocket.send(ackPacket);
                 numACKPacketsSent++;
             }
-
-            // write data from recieved packet to the outputFile
-            FileUtils.writeByteArrayToFile(outputFile, datagramPacket.getData(), true);
         }
+        
+        // save stop time when sending data has finished 
+        endTime = System.nanoTime();
 
-        // Print the data received
-        System.out.println(" ------------ DATA ---------------- ");
+        //Print out Basic Statistics
+        System.out.println("The server took " + (endTime - startTime) + " nanoseconds to complete sending all of the data.");
+        System.out.println("The server successfully sent " + numACKPacketsSent + " ack packets. ");
+        System.out.println("The server dropped " + numACKPacketsLost + " ack packets (simulated). ");
 
         for (PacketData p : received) {
             for (byte b : p.getData()) {
-                System.out.print((char) b);
+                byte[] byteTemp = new byte[1];
+                Arrays.fill(byteTemp, b);
+                FileUtils.writeByteArrayToFile(outputFile, byteTemp, true);
             }
         }
 
@@ -130,7 +142,7 @@ public class Client_GBN {
      * Method to convert our packet objects into bytes for sending to the client
      *
      * @param file
-     * @return
+     * @return  
      */
     public static byte[] toBytes(Object obj) throws IOException {
         ByteArrayOutputStream b = new ByteArrayOutputStream();
@@ -147,9 +159,22 @@ public class Client_GBN {
      * @return
      */
     public static Object toObject(byte[] bytes) throws IOException, ClassNotFoundException {
-        ByteArrayInputStream b = new ByteArrayInputStream(bytes);
-        ObjectInputStream o = new ObjectInputStream(b);
-        return o.readObject();
+        Object obj = null;
+        ByteArrayInputStream bis = null;
+        ObjectInputStream ois = null;
+        try {
+            bis = new ByteArrayInputStream(bytes);
+            ois = new ObjectInputStream(bis);
+            obj = ois.readObject();
+        } finally {
+            if (bis != null) {
+                bis.close();
+            }
+            if (ois != null) {
+                ois.close();
+            }
+        }
+        return obj;    
     }
 
     /**
