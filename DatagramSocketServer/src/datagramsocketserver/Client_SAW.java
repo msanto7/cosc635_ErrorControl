@@ -17,6 +17,7 @@ import org.apache.commons.io.FileUtils;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.Scanner;
 
 
 public class Client_SAW {       
@@ -28,10 +29,25 @@ public class Client_SAW {
         
         // run method to clear the outputfile if it exists
         outClear();
+        // Scanner obj for user input
+        Scanner input = new Scanner(System.in);
+        
+        // prompt user for server ip address     
+        String userInput;        
+        do {
+            System.out.println(" Please enter the ip address of the server you would like to connect to. ");
+            while (!input.hasNext()) {
+                System.out.println("Please enter the ip address of the server you would like to connect to.");
+                input.next();
+            }
+            userInput = input.next();
+        } while (userInput != "");
               
         try (DatagramSocket clientSocket = new DatagramSocket(portNumClient)) {
             byte[] tempBytes = new byte[1024];
             File outputFile = new File("src/datagramsocketserver/COSC635_P2_DataRecieved.txt");
+            
+            // send ip address to server
             
             while (true) {
                 DatagramPacket datagramPacket = new DatagramPacket(tempBytes, tempBytes.length);

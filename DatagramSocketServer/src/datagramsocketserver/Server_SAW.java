@@ -16,6 +16,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
@@ -24,7 +25,7 @@ import java.util.Scanner;
 // SERVER -- Sender 
 public class Server_SAW {       
     
-    public static void main(String[] args)
+    public static void main(String[] args) throws UnknownHostException
     {
         int portNumServer = 50000;        
         int portNumClient = 50001;
@@ -35,6 +36,12 @@ public class Server_SAW {
         
         // Scanner obj for user input
         Scanner input = new Scanner(System.in);
+        
+        InetAddress localhost = InetAddress.getLocalHost();
+        
+        System.out.println("Server Started.");
+        System.out.println("IP address: " + localhost.getHostAddress().trim());
+        System.out.println("Port Number: " + portNumServer);
         
         // prompt user for random number to simulate packet loss         
         int userInput;        
@@ -50,7 +57,7 @@ public class Server_SAW {
         
         // set up socket for client
         try (DatagramSocket serverSocket = new DatagramSocket(portNumServer))
-        {
+        {            
             // read the input file into an array of bytes 
             File inputFile = new File("src/datagramsocketserver/COSC635_P2_DataSent.txt");        
             byte[] inputBytes = fileToBytes(inputFile);
@@ -70,7 +77,8 @@ public class Server_SAW {
                 DatagramPacket datagramPacket = new DatagramPacket(
                         packetBytes,
                         packetBytes.length,
-                        InetAddress.getLocalHost(),
+                        //InetAddress.getLocalHost(),
+                        InetAddress.getByName("10.0.0.44"),                        
                         portNumClient
                 );
 
