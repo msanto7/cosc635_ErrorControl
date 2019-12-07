@@ -7,32 +7,74 @@ package datagramsocketdemo;
 
 import java.io.*;
 import java.net.*;
-import java.util.Scanner;
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
 
-public class DatagramSocketClient {
+public class DatagramSocketClient 
+{
+    //Global GUI varribles
+    
+    //varrible for connect button
+    public static JButton B_CONNECT = new JButton("CONNECT");
+    
+    //varriable for main application window
+    public static JFrame MAIN_WINDOW = new JFrame("Datagram Packet Server");
+    
+    //varriable for scrollbar
+    public static JScrollPane SP_OUTPUT = new JScrollPane();
+    
+    //varriable for text output area
+    public static JTextArea TA_OUTPUT = new JTextArea();
 
+    
+//----------------------------------------------------------------------------//    
+    
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    
+    public static void main(String[] args) 
+    {
         
-        DatagramSocket skt = null;
-        //creates the DatagramSocket
-        try{
+        BuildGui();
+
+    }
+
+//----------------------------------------------------------------------------//
+    
+    public static void Connect()
+    {
+        try
+        {
+         
+            //create a datagram socket
+            DatagramSocket SOCK = new DatagramSocket();
             
-            skt = new DatagramSocket();
+            //connect to the server
+            byte[] BUFFER = new byte[1024];
             
-            String[] bArray = readArray("../COSC635_P2_DataSent.txt");
-            //calls method that reads from .txt file and returns elements as an array of strings
+            InetAddress IP_ADDRESS = InetAddress.getByName("localhost");
             
-            String holder = "";
-            
-            //little bit of code to print elements in bArray
-//            for (int i = 0;  i < bArray.length; i++) {
-//                System.out.println(bArray[i]);
-//                holder = bArray[i];
-//                
-//            }
+
+            DatagramPacket PACKET = new DatagramPacket(BUFFER, BUFFER.length, IP_ADDRESS, 777);
+
+            SOCK.send(PACKET);
+
+            //reconstruct bew Packet and request packet from server
+            PACKET = new DatagramPacket(BUFFER, BUFFER.length);
+
+            SOCK.receive(PACKET);
+
+            //extract data from stream and convert to string
+            String MESSAGE = new String(PACKET.getData(), 0, PACKET.getLength());
+
+            //appends String "MESSAGE" to the global gui output varrible "TA_OUTPUT"
+            TA_OUTPUT.append(MESSAGE);
             
             String msg = "text message";
             //test message this is where the file reader varible could be put instead
@@ -49,109 +91,157 @@ public class DatagramSocketClient {
             DatagramPacket request = new DatagramPacket(b, b.length , host, serverSocket);
             //creates datagram packet puts in data "b", with length.b, host ip address, port number
             
-            skt.send(request);
+            SOCK.send(request);
             //initializes socket "skt" to send packet "request"
             
+            SOCK.close();
             
-            //---------------------------------------------------//
-            
-            byte [] buffer = new byte[1024];
-            //creates buffer to catch and hold incoming packet data
-            
-            DatagramPacket reply = new DatagramPacket(buffer,buffer.length);
-            //constructs packet to hold incoming byte data to be read on client machine
-            
-            skt.receive(reply);
-            //initializes socket to recieve incoming packet data
-            
-            System.out.println("Client recieved " + new String(reply.getData()));
-            
-            skt.close();
-            //need to close socket at end of transmission
         }
-        catch(Exception ex){
-            
+        catch(IOException X)
+        {
+            System.out.print(X);
         }
     }
-    /***
-     * takes in a .txt file and creates an array of strings of the elements in the file
-     * @param String file
-     * @return Byte[] byteSize
-     */
-    public static String[] readArray(String file) {
-        
-        int counter = 0;
-        
-        try{
-            Scanner s = new Scanner(new File(file));
-            while (s.hasNextLine()){
-                counter++;
-                s.next();
-            }
-            
-            String[] words = new String[counter];
-            
-            Scanner s1 = new Scanner(new File(file));
-            
-            for (int i = 0; i < counter; i++) {
-                words[i] = s1.next();
-            }
-            return words;
-        }
-        catch(FileNotFoundException e){
-            System.out.println("file not found");
-        }
-        return null;
-    } 
     
+//----------------------------------------------------------------------------//
+
+     /**
+     *constructor for the GUI and sets the specific fields for the global GUI varribles
+     */
+    
+    public static void BuildGui()
+    {
+        
+        MAIN_WINDOW.setSize(2000, 1800);
+        MAIN_WINDOW.setLocation(200, 200);
+        MAIN_WINDOW.setResizable(true);
+        MAIN_WINDOW.setBackground(new java.awt.Color(255, 255, 255));
+        MAIN_WINDOW.getContentPane().setLayout(null);
+        
+        B_CONNECT.setBackground(new java.awt.Color(0, 0, 255));
+        B_CONNECT.setForeground(new java.awt.Color(255, 255, 255));
+        MAIN_WINDOW.getContentPane().add(B_CONNECT);
+        B_CONNECT.setBounds(150, 200, 220, 50);
+        
+        TA_OUTPUT.setLineWrap(true);
+        SP_OUTPUT.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        SP_OUTPUT.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        SP_OUTPUT.setViewportView(TA_OUTPUT);
+        MAIN_WINDOW.getContentPane().add(SP_OUTPUT);
+        SP_OUTPUT.setBounds(500, 45, 1000, 800);
+        
+        //instansiates the action listener method to allow for user mouse clicks
+        MainWindow_Action();        
+        
+        MAIN_WINDOW.setVisible(true);
+        
+    }
+    
+
+//----------------------------------------------------------------------------//
+
+    /**
+     * creates a methods that implements ActionListener to be able to read user mouse clicks
+     */
+    
+    public static void MainWindow_Action()
+    {
+        
+        B_CONNECT.addActionListener(
+        
+        new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                Connect();
+            }        
+        });
+    }      
+
+//----------------------------------------------------------------------------//    
     
     /**
      * This method takes our received data packet and writes it to an output file.
      * This will append the packet to the output file.
      * @param in is an array of received data;
      */
-    public static void writeOut(byte[] in){
-        String message = new String(in);
+    public static void writeOut(byte[] in)
+    {
         //Converts the byte[] back into a String.
         //I think you have to do this. 
-        File outputFile = new File("./635Group4Output.txt"); 
+        String message = new String(in);
+        
         //Makes our file.
-        String location = outputFile.getAbsolutePath();
+        File outputFile = new File("./635Group4Output.txt"); 
+        
         //Gets a string to the directory location of the outputfile
+        String location = outputFile.getAbsolutePath();
+        
+        //Tells user where to find the output file.
         System.out.println("Writing output to 635Group4Output.txt at: "
                 + location);
-        //Tells user where to find the output file.
-        try {
-            FileWriter outWriter = new FileWriter(outputFile, true);
+        
+        try 
+        {
             //The true parameter means it will append data rather than overwrite the file..
-            outWriter.write(message);
+            FileWriter outWriter = new FileWriter(outputFile, true);
+            
             //Writes our output.
+            outWriter.write(message);
+            
             outWriter.flush();
+            
             outWriter.close();
-        } catch (IOException e){
+            
+        } 
+        
+        catch (IOException e)
+            
+        {
+            
             System.out.println("Output file wasn't found, this shouldn't be possible.");
+            
         }
     }
+   
+//----------------------------------------------------------------------------//    
     
     /**
      * This should be called at the very beginning of the app, so that if the app
      * is run more than once it clears the output file instead of constantly
      * appending data to the end
      */
-    public static void outClear(){
+    public static void outClear()
+    {
+        
         File outputFile = new File("./635Group4Output.txt"); 
-        try {
-            if(outputFile.exists()){
-                FileWriter clearer = new FileWriter (outputFile, false);
+        
+        try 
+        {
+            
+            if(outputFile.exists())
+            {
+                
                 //'false' means it should overwrite the contents of the file. I hope.
+                FileWriter clearer = new FileWriter (outputFile, false);
+                
                 clearer.write(" ");
+                
                 clearer.flush();
+                
                 clearer.close();
+                
                 System.out.print("Output file cleared");
+                
             } 
-        } catch (IOException e){
+        } 
+        
+        catch (IOException e)
+            
+        {
             
         }
     }
     
 }
+

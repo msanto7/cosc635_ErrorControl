@@ -32,7 +32,7 @@ public class SAWserver {
         if ((userNum <0) || (userNum >99)){
             System.out.println("Please enter a number between 0-99: ");
             userNum = s.nextInt();
-    }
+        }
 
     
     }
