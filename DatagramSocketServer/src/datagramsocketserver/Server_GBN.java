@@ -68,7 +68,7 @@ public class Server_GBN {
         // Last packet sequence number
         numPacketsSent = (int) Math.ceil((double) inputBytes.length / packetSize);
 
-        DatagramSocket serverSocket = new DatagramSocket();
+        DatagramSocket serverSocket = new DatagramSocket(portNumServer);
         InetAddress clientIP = InetAddress.getByName("localhost");
 
         // list of packet objects
@@ -94,7 +94,8 @@ public class Server_GBN {
                 DatagramPacket packet = new DatagramPacket(
                         sendData,
                         sendData.length,
-                        clientIP,
+                        //clientIP,
+                        InetAddress.getLocalHost(),
                         portNumClient
                 );
                 packetList.add(serverPacket);
@@ -133,7 +134,8 @@ public class Server_GBN {
                     DatagramPacket packet = new DatagramPacket(
                             sendData,
                             sendData.length,
-                            clientIP,
+                            //clientIP,
+                            InetAddress.getLocalHost(),
                             portNumClient
                     );
 
