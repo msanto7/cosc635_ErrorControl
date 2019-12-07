@@ -8,10 +8,15 @@ import java.util.*;
 import java.nio.*;
 //I don't know what will and won't be useful so we can trim this list of imports later.
 /**
- *
- * @author wrkealey0
- * @version 1115191603
+ /**
+ 
+ * @author Mike Santoro
+ * @author John Haney
+ * @author Marisa Hammond
+ * @author William Kealey
+ * @Version 1207191631
  */
+
 public class SAWdemoKealey {
     private static final int WINSIZE = 15;
     // 15 is an arbitrary window size for sending/recieving data.

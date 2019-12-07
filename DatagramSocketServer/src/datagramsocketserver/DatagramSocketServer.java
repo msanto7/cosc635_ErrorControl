@@ -1,5 +1,5 @@
 /*
- * To use, the server must be running first before client prgram can be run
+ * To use, the server must be running first before client progam can be run.
  * 
  * 
  */
@@ -16,6 +16,14 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+/**
+ * 
+ * @author Mike Santoro
+ * @author John Haney
+ * @author Marisa Hammond
+ * @author William Kealey
+ * @Version 1207191631
+ */
 
 public class DatagramSocketServer extends Thread 
 {
@@ -296,7 +304,7 @@ public class DatagramSocketServer extends Thread
 
     /**
      * creates a methods that implements ActionListener to be able to enter number
-     * to be used in psuedo packet drop simulator
+     * to be used in pseudo-packet drop simulator
      */    
     
     public static void PsuedoWindow_Action()

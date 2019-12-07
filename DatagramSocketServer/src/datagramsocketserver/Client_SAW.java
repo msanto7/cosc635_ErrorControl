@@ -41,7 +41,7 @@ public class Client_SAW {
                 input.next();
             }
             userInput = input.next();
-        } while (userInput != "");
+        } while (!userInput.equals(""));
               
         try (DatagramSocket clientSocket = new DatagramSocket(portNumClient)) {
             byte[] tempBytes = new byte[1024];
