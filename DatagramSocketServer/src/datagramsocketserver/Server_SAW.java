@@ -77,16 +77,15 @@ public class Server_SAW {
                 DatagramPacket datagramPacket = new DatagramPacket(
                         packetBytes,
                         packetBytes.length,
-                        //InetAddress.getLocalHost(),
-                        InetAddress.getByName("10.0.0.44"),                        
+                        InetAddress.getLocalHost(),
+                        //InetAddress.getByName("10.0.0.44"),                        
                         portNumClient
                 );
 
                 while (ack == false) {
                     
                     if (DropPacket(userInput)) {
-                        //packet is dropped - update counter
-                        numPacketsLost++;
+                        //packet is dropped - update counter                        
                     } else {
                         // send the udp packet to the client 
                         serverSocket.send(datagramPacket);                        
@@ -106,6 +105,7 @@ public class Server_SAW {
                     }
                     catch (SocketTimeoutException e) {
                         System.out.println("Acknowledgment not recieved after 3 seconds, resending data");
+                        numPacketsLost++;
                     }                                                                                    
                 }                                
             } 

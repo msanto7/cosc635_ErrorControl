@@ -5,101 +5,106 @@
 /// -- Marisa Hammond
 /// -- William Kealey
 /// -- John Haney
-
 package datagramsocketserver;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.DatagramPacket;
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FileUtils; // requires the attached folder and project property
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.util.Scanner;
+import java.net.SocketTimeoutException;
 
-
-public class Client_SAW {       
+//Client - Receiver
+public class Client_SAW {
     
-    public static void main(String[] args)
-    {       
-        int portNumServer = 50000;        
+    public static void main(String[] args) throws Exception {
+        int portNumServer = 50000;
         int portNumClient = 50001;
-        
+        long startTime = 0;
+        long endTime = 0;
+        boolean runClient = true;
+        int numACKPacketsSent = 0;
+
         // run method to clear the outputfile if it exists
         outClear();
-        // Scanner obj for user input
-        Scanner input = new Scanner(System.in);
-        
-        // prompt user for server ip address     
-        String userInput;        
-        do {
-            System.out.println(" Please enter the ip address of the server you would like to connect to. ");
-            while (!input.hasNext()) {
-                System.out.println("Please enter the ip address of the server you would like to connect to.");
-                input.next();
-            }
-            userInput = input.next();
-        } while (!userInput.equals(""));
-              
         try (DatagramSocket clientSocket = new DatagramSocket(portNumClient)) {
             byte[] tempBytes = new byte[1024];
             File outputFile = new File("src/datagramsocketserver/COSC635_P2_DataRecieved.txt");
-            
-            // send ip address to server
-            
-            while (true) {
+
+            while (runClient) {
                 DatagramPacket datagramPacket = new DatagramPacket(tempBytes, tempBytes.length);
-                clientSocket.receive(datagramPacket);
-                
+
+                // resend data if timeout is reached befire ack is recieved 
+                clientSocket.setSoTimeout(20000);
+
+                try {
+                    clientSocket.receive(datagramPacket);
+                } catch (SocketTimeoutException e) {
+                    System.exit(0);
+                }
+
+                // save the start time 
+                startTime = System.nanoTime();
+
                 // write data from recieved packet to the outputFile
                 FileUtils.writeByteArrayToFile(outputFile, datagramPacket.getData(), true);
-                
+
                 String ackMessage = "received packet";
-                
+
                 // create packet to send to the client 
                 DatagramPacket ackPacket = new DatagramPacket(
                         ackMessage.getBytes(),
                         ackMessage.length(),
                         InetAddress.getLocalHost(),
+                        //InetAddress.getByName("10.0.0.44"),
                         portNumServer
                 );
-                
+
                 // send acknowledgement packet to the server
-                clientSocket.send(ackPacket);        
-            }                        
-        }
-        catch (SocketException e) {
+                clientSocket.send(ackPacket);
+                
+                numACKPacketsSent++;
+            }
+
+            // save stop time when sending data has finished 
+            endTime = System.nanoTime();
+
+            //Print out Basic Statistics
+            System.out.println("The client took " + (endTime - startTime) + " nanoseconds to complete sending all of the data.");
+            System.out.println("The client successfully sent " + numACKPacketsSent + "  ACK packets. ");
+
+        } catch (SocketException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-        
-               
+
     } // Ends Main
-    
-       
+
     /**
-     * This should be called at the very beginning of the app, so that if the app
-     * is run more than once it clears the output file instead of constantly
+     * This should be called at the very beginning of the app, so that if the
+     * app is run more than once it clears the output file instead of constantly
      * appending data to the end
      */
-    public static void outClear(){
-        File outputFile = new File("src/datagramsocketserver/COSC635_P2_DataRecieved.txt"); 
+    public static String outClear() {
+        String msg = "";
+        File outputFile = new File("src/datagramsocketserver/COSC635_P2_DataRecieved.txt");
         try {
-            if(outputFile.exists()){
-                FileWriter clearer = new FileWriter (outputFile, false);
+            if (outputFile.exists()) {
+                FileWriter clearer = new FileWriter(outputFile, false);
                 //'false' means it should overwrite the contents of the file. I hope.
-                clearer.write(" ");
+                clearer.write("");
                 clearer.flush();
                 clearer.close();
-                System.out.print("Output file cleared");
-            } 
-        } catch (IOException e){
-            
+                msg = "Output file cleared";
+            }
+        } catch (IOException e) {
+
         }
+        return msg;
     }
-    
+
 } // Ends class 

@@ -23,6 +23,7 @@ import java.util.Random;
 import java.util.Scanner;
 import org.apache.commons.io.FileUtils;
 
+// Client - Receiver
 public class Client_GBN {
 
     public static void main(String[] args) throws Exception {
@@ -79,6 +80,7 @@ public class Client_GBN {
             } else if (datagramObject.getSeq() == currentWindow) {
                 currentWindow++;
                 received.add(datagramObject);
+                FileUtils.writeByteArrayToFile(outputFile, datagramObject.getData(), true);  
             // transmission error 
             } else {
                 // drop packet                 
@@ -89,9 +91,8 @@ public class Client_GBN {
             DatagramPacket ackPacket = new DatagramPacket(
                     ackMessage,
                     ackMessage.length,
-                    //datagramPacket.getAddress(),
-                    //datagramPacket.getPort()
                     InetAddress.getLocalHost(),
+                    //InetAddress.getByName("10.0.0.44"), 
                     portNumServer
             );
             
@@ -107,17 +108,10 @@ public class Client_GBN {
         endTime = System.nanoTime();
 
         //Print out Basic Statistics
-        System.out.println("The server took " + (endTime - startTime) + " nanoseconds to complete sending all of the data.");
-        System.out.println("The server successfully sent " + numACKPacketsSent + " ack packets. ");
-        System.out.println("The server dropped " + numACKPacketsLost + " ack packets (simulated). ");
-
-        for (PacketData p : received) {
-            for (byte b : p.getData()) {
-                byte[] byteTemp = new byte[1];
-                Arrays.fill(byteTemp, b);
-                FileUtils.writeByteArrayToFile(outputFile, byteTemp, true);
-            }
-        }
+        System.out.println("The client took " + (endTime - startTime) + " nanoseconds to complete sending all of the data.");
+        System.out.println("The client successfully sent " + numACKPacketsSent + " ack packets. ");
+        System.out.println("The client dropped " + numACKPacketsLost + " ack packets (simulated). ");        
+        System.out.println("The size of the output file is " + outputFile.getTotalSpace() + " bytes large. " );
 
     } // End Main 
 

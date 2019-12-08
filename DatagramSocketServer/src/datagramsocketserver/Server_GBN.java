@@ -23,10 +23,8 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
 
-public class Server_GBN {
-    
-    // Maximum Segment Size - Quantity of data from the application layer in the segment
-    public static final int MSS = 4;
+public class Server_GBN {   
+    public static final int MAX_SIZE = 4;
 
     public static void main(String[] args) throws Exception {
 
@@ -68,7 +66,7 @@ public class Server_GBN {
         byte[] inputBytes = fileToBytes(inputFile);
 
         // Last packet sequence number
-        int numPacketsSent = (int) Math.ceil((double) inputBytes.length / MSS);
+        int numPacketsSent = (int) Math.ceil((double) inputBytes.length / MAX_SIZE);
 
         DatagramSocket serverSocket = new DatagramSocket(portNumServer);
         InetAddress clientIP = InetAddress.getByName("localhost");
@@ -86,8 +84,8 @@ public class Server_GBN {
             while (last - seqACK < window && last < numPacketsSent) {
 
                 // create new byte array of the section we want for this specific packet
-                byte[] filePacketBytes = new byte[MSS];
-                filePacketBytes = Arrays.copyOfRange(inputBytes, last * MSS, last * MSS + MSS);
+                byte[] filePacketBytes = new byte[MAX_SIZE];
+                filePacketBytes = Arrays.copyOfRange(inputBytes, last * MAX_SIZE, last * MAX_SIZE + MAX_SIZE);
                 // create packet object for sending
                 PacketData serverPacket = new PacketData(last, filePacketBytes, (last == numPacketsSent - 1) ? true : false);
                 byte[] sendData = toBytes(serverPacket);
@@ -96,8 +94,8 @@ public class Server_GBN {
                 DatagramPacket packet = new DatagramPacket(
                         sendData,
                         sendData.length,
-                        //clientIP,
                         InetAddress.getLocalHost(),
+                        //InetAddress.getByName("10.0.0.44"), 
                         portNumClient
                 );
                 packetList.add(serverPacket);
@@ -118,7 +116,7 @@ public class Server_GBN {
 
             try {
                 // resend data if timeout is reached before ack is recieved 
-                serverSocket.setSoTimeout(50);
+                serverSocket.setSoTimeout(100);
                 serverSocket.receive(ack);
                 ReturnData ackObject = (ReturnData) toObject(ack.getData());
                 if (ackObject.getPacket() == numPacketsSent) {
@@ -127,17 +125,17 @@ public class Server_GBN {
                 seqACK = Math.max(seqACK, ackObject.getPacket());
 
             } catch (SocketTimeoutException e) {
-
+                numPacketsLost++;
                 for (int i = seqACK; i < last; i++) {
-                    System.out.println("Acknowledgment not recieved after 3 seconds, resending data");
+                    System.out.println("Acknowledgment not recieved, resending data");
                     byte[] sendData = toBytes(packetList.get(i));                    
 
                     // create packet to send to the client 
                     DatagramPacket packet = new DatagramPacket(
                             sendData,
                             sendData.length,
-                            //clientIP,
                             InetAddress.getLocalHost(),
+                            //InetAddress.getByName("10.0.0.44"), 
                             portNumClient
                     );
 
@@ -160,6 +158,7 @@ public class Server_GBN {
         System.out.println("The server took " + (endTime - startTime) + " nanoseconds to complete sending all of the data.");
         System.out.println("The server successfully sent " + numPacketsSent + " packets. ");
         System.out.println("The server dropped " + numPacketsLost + " packets (simulated). ");
+        System.out.println("The size of the input file is " + inputFile.getTotalSpace() + " bytes large. " );
 
     } // Ends main
 
